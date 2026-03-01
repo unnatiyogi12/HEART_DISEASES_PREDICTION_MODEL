@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-model = joblib.load('LogisticRegression_heart_diseases.pkl')
+model = joblib.load('KNeighborsClassifier_heart_diseases.pkl')
 scaler = joblib.load('scaler.pkl')
 exprected_columns = joblib.load('columns.pkl')
 
@@ -23,17 +23,21 @@ ST_Slope = st.selectbox("ST Slope",["Up", "Flat", "Down"])
 
 if st.button('predict'):
     raw_data = {
-        'age': age, 
-        'restingBP': restingBP,
-        'cholesterol': cholesterol, 
-        'fastingBS':  fastingBS,
-        'maxHR': maxHR,
-        'oldpeak': oldpeak,
-        'sex_' + sex: 1,
-        'ChestPainType_' + ChestPainType: 1,
-        'restingECG_' + restingECG: 1,  
-        'exerciseAngina_' + exerciseAngina: 1,
-        'ST_Slope_' + ST_Slope: 1
+        'Age': age, 
+        'RestingBP': restingBP,
+        'Cholesterol': cholesterol, 
+        'FastingBS': 1 if fastingBS == "Yes" else 0,
+        'MaxHR': maxHR,
+        'Oldpeak': oldpeak,
+        'Sex_M': 1 if sex == "Male" else 0,
+        'ChestPainType_ATA': 1 if ChestPainType == "ATA" else 0,
+        'ChestPainType_NAP': 1 if ChestPainType == "NAP" else 0,
+        'ChestPainType_TA': 1 if ChestPainType == "TA" else 0,
+        'RestingECG_Normal': 1 if restingECG == "Normal" else 0,  
+        'RestingECG_ST': 1 if restingECG == "ST" else 0,
+        'ExerciseAngina_Y': 1 if exerciseAngina == "Yes" else 0,
+        'ST_Slope_Flat': 1 if ST_Slope == "Flat" else 0,
+        'ST_Slope_Up': 1 if ST_Slope == "Up" else 0
     }
 
     input_data = pd.DataFrame([raw_data])
@@ -44,9 +48,9 @@ if st.button('predict'):
     
     input_data = input_data[exprected_columns]
     # agr use kr rhe model like KNN, SVM, Logistic Regression to scale the data
-    # input_data_scaled = scaler.transform(input_data)
+    input_data_scaled = scaler.transform(input_data)
 
-    prediction = model.predict(input_data)
+    prediction = model.predict(input_data_scaled)[0]
     if prediction == 1:
         st.error(" ⚠️ The patient is likely to have a heart stroke.")
     else:
